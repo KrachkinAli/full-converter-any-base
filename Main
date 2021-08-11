@@ -1,0 +1,61 @@
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.Scanner;
+
+public class Main {
+    private static final Scanner sc = new Scanner(System.in);
+    public static boolean exit = false;
+    public static boolean back = false;
+    static final String possibleValues = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    public static void main(String[] args) {
+        while (!exit) {
+            System.out.print("Enter two numbers in format: {source base} {target base} (To quit type /exit) > ");
+            String source = sc.next();
+            if (source.equalsIgnoreCase("/exit")) {
+                exit = true;
+            } else {
+                String target = sc.next();
+                while (!back) {
+                    System.out.print("Enter number in base " + source + " to convert to base " +
+                            target + " (To go back type /back) > ");
+                    String[] number = sc.next().split("\\.");
+                    if (number[0].equalsIgnoreCase("/back")) {
+                        back = true;
+                        System.out.println();
+                    } else {
+                        try {
+                            BigInteger b = new BigInteger(number[0], Integer.parseInt(source));
+                            System.out.print("Conversion result: " + b.toString(Integer.parseInt(target)));
+                            if (number.length == 1) {
+                                System.out.println();
+                            }
+                            if (number.length == 2) {
+                                toAnyFraction(number[1], source, target);
+                                System.out.println();
+                            }
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                }
+                back = false;
+            }
+        }
+    }
+
+    public static void toAnyFraction(String number, String source, String target) {
+        BigDecimal fraction = new BigDecimal("0");
+        StringBuilder answer = new StringBuilder();
+        for (int i = 0; i < number.length(); i++) {
+            fraction = fraction.add(BigDecimal.valueOf(possibleValues.indexOf(number.toUpperCase().charAt(i)))
+                    .divide(BigDecimal.valueOf(Math.pow(Double.parseDouble(source), i + 1)), 30, RoundingMode.HALF_DOWN));
+        }
+        while (answer.length() < 5) {
+            BigDecimal temp = fraction.multiply(new BigDecimal(target)).setScale(0, RoundingMode.DOWN);
+            answer.append(possibleValues.toLowerCase().charAt(Integer.parseInt(temp.toPlainString())));
+            fraction = fraction.multiply(new BigDecimal(target)).subtract(temp);
+        }
+        System.out.println("." + answer);
+    }
+}
